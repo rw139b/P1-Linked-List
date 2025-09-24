@@ -1,6 +1,8 @@
 #include "lab.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+
 
 /**
  * @brief structure for the doubly linked list
@@ -235,4 +237,100 @@ bool list_is_empty(const List *list) {
         return true;
     }
     return list->size == 0;
+}
+
+//P2
+
+/**
+ * @brief Sorts a portion of the list between start and end indices (inclusive)
+ * using bubble sort and the given compare function.
+ */
+void sort(List *list, size_t start, size_t end, CompareFunc cmp) {
+    if (!list || start >= end || end >= list->size) return;
+
+    for (size_t i = start; i < end; i++) {
+        Node *a = list->sentinel->next;
+        for (size_t k = 0; k < i; k++) {
+            a = a->next;
+        }
+        for (size_t j = start; j < end - (i - start); j++) {
+            Node *b = a->next;
+            if (cmp(a->data, b->data) > 0) {
+                void *tmp = a->data;
+                a->data = b->data;
+                b->data = tmp;
+            }
+            a = b;
+        }
+    }
+}
+
+/**
+ * @brief Merges two sorted lists into a new sorted list.
+ */
+List *merge(const List *a, const List *b, CompareFunc cmp) {
+    if (!a || !b || !cmp) return NULL;
+
+    List *out = list_create(LIST_LINKED_SENTINEL);
+    if (!out) return NULL;
+
+    Node *na = a->sentinel->next;
+    Node *nb = b->sentinel->next;
+
+    while (na != a->sentinel && nb != b->sentinel) {
+        if (cmp(na->data, nb->data) <= 0) {
+            list_append(out, na->data);
+            na = na->next;
+        } else {
+            list_append(out, nb->data);
+            nb = nb->next;
+        }
+    }
+
+    while (na != a->sentinel) {
+        list_append(out, na->data);
+        na = na->next;
+    }
+
+    while (nb != b->sentinel) {
+        list_append(out, nb->data);
+        nb = nb->next;
+    }
+
+    return out;
+}
+
+
+/**
+ * @brief Compare integers in descending order.
+ */
+int compare_int(const void *a, const void *b) {
+    int ia = *(const int *)a;
+    int ib = *(const int *)b;
+    return (ib - ia);  // bigger first (descending)
+}
+
+/**
+ * @brief Compare strings lexicographically (ascending).
+ */
+int compare_str(const void *a, const void *b) {
+    const char *sa = (const char *)a;
+    const char *sb = (const char *)b;
+    return strcmp(sa, sb);
+}
+
+/**
+ * @brief Checks if the list is sorted according to cmp.
+ */
+bool is_sorted(const List *list, CompareFunc cmp) {
+    if (!list || list->size < 2) return true;
+
+    Node *cur = list->sentinel->next;
+    while (cur->next != list->sentinel) {
+        if (cmp(cur->data, cur->next->data) > 0) {
+            return false;
+        }
+        cur = cur->next;
+    }
+    return true;
 }

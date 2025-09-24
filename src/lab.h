@@ -88,4 +88,18 @@ size_t list_size(const List *list);
  */
 bool list_is_empty(const List *list);
 
+//P2
+/**
+ * @typedef CompareFunc
+ * @brief Function pointer type for comparing two elements.
+ * Should return <0 if a<b, 0 if equal, >0 if a>b.
+ */
+typedef int (*CompareFunc)(const void *, const void *);
+
+void sort(List *list, size_t start, size_t end, CompareFunc cmp);
+List *merge(const List *list1, const List *list2, CompareFunc cmp);
+int compare_int(const void *a, const void *b);
+int compare_str(const void *a, const void *b);
+bool is_sorted(const List *list, CompareFunc cmp);
+
 #endif // LAB_H

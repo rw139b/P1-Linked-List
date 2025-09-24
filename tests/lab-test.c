@@ -204,6 +204,189 @@ void test_list_get_null(void) {
     TEST_ASSERT_NULL(list_get(NULL, 100)); // redundant but forces both args
 }
 
+//P2
+void test_compare_int_and_sort(void) {
+    List *list = list_create(LIST_LINKED_SENTINEL);
+
+    // Add integers in random order
+    int *a = malloc(sizeof(int)); *a = 5;
+    int *b = malloc(sizeof(int)); *b = 10;
+    int *c = malloc(sizeof(int)); *c = 3;
+    int *d = malloc(sizeof(int)); *d = 8;
+
+    list_append(list, a);
+    list_append(list, b);
+    list_append(list, c);
+    list_append(list, d);
+
+    // Sort entire list using compare_int (descending order)
+    sort(list, 0, list_size(list) - 1, compare_int);
+
+    TEST_ASSERT_TRUE(is_sorted(list, compare_int));
+
+    int *v0 = list_get(list, 0);
+    int *v1 = list_get(list, 1);
+    int *v2 = list_get(list, 2);
+    int *v3 = list_get(list, 3);
+
+    TEST_ASSERT_EQUAL_INT(10, *v0);
+    TEST_ASSERT_EQUAL_INT(8, *v1);
+    TEST_ASSERT_EQUAL_INT(5, *v2);
+    TEST_ASSERT_EQUAL_INT(3, *v3);
+
+    list_destroy(list, free);
+}
+
+void test_compare_str_and_sort(void) {
+    List *list = list_create(LIST_LINKED_SENTINEL);
+
+    char *s1 = strdup("banana");
+    char *s2 = strdup("apple");
+    char *s3 = strdup("cherry");
+
+    list_append(list, s1);
+    list_append(list, s2);
+    list_append(list, s3);
+
+    // Sort lexicographically
+    sort(list, 0, list_size(list) - 1, compare_str);
+
+    TEST_ASSERT_TRUE(is_sorted(list, compare_str));
+
+    char *r0 = list_get(list, 0);
+    char *r1 = list_get(list, 1);
+    char *r2 = list_get(list, 2);
+
+    TEST_ASSERT_EQUAL_STRING("apple", r0);
+    TEST_ASSERT_EQUAL_STRING("banana", r1);
+    TEST_ASSERT_EQUAL_STRING("cherry", r2);
+
+    list_destroy(list, free);
+}
+
+void test_merge_lists(void) {
+    List *l1 = list_create(LIST_LINKED_SENTINEL);
+    List *l2 = list_create(LIST_LINKED_SENTINEL);
+
+    int *a = malloc(sizeof(int)); *a = 10;
+    int *b = malloc(sizeof(int)); *b = 8;
+    int *c = malloc(sizeof(int)); *c = 5;
+    list_append(l1, a);
+    list_append(l1, b);
+    list_append(l1, c);
+
+    int *d = malloc(sizeof(int)); *d = 7;
+    int *e = malloc(sizeof(int)); *e = 4;
+    int *f = malloc(sizeof(int)); *f = 1;
+    list_append(l2, d);
+    list_append(l2, e);
+    list_append(l2, f);
+
+    // Both lists are already sorted descending
+    List *merged = merge(l1, l2, compare_int);
+
+    TEST_ASSERT_EQUAL_UINT32(6, list_size(merged));
+    TEST_ASSERT_TRUE(is_sorted(merged, compare_int));
+
+    int *first = list_get(merged, 0);
+    int *last = list_get(merged, 5);
+    TEST_ASSERT_EQUAL_INT(10, *first);
+    TEST_ASSERT_EQUAL_INT(1, *last);
+
+    list_destroy(l1, free);
+    list_destroy(l2, free);
+    list_destroy(merged, NULL); // merged reuses data pointers
+}
+
+void test_is_sorted_edge_cases(void) {
+    List *list = list_create(LIST_LINKED_SENTINEL);
+
+    // Empty list -> sorted
+    TEST_ASSERT_TRUE(is_sorted(list, compare_int));
+
+    int *x = malloc(sizeof(int)); *x = 42;
+    list_append(list, x);
+
+    // Single element -> sorted
+    TEST_ASSERT_TRUE(is_sorted(list, compare_int));
+
+    // Add one more element, out of order
+    int *y = malloc(sizeof(int)); *y = 99;
+    list_append(list, y);
+
+    TEST_ASSERT_FALSE(is_sorted(list, compare_int));
+
+    list_destroy(list, free);
+}
+
+void test_randomized_sort_and_is_sorted(void) {
+    List *list = list_create(LIST_LINKED_SENTINEL);
+    srand(12345); // fixed seed for reproducibility
+
+    // Fill with 100 random ints
+    for (int i = 0; i < 100; i++) {
+        int *val = malloc(sizeof(int));
+        *val = rand() % 1000; 
+        list_append(list, val);
+    }
+
+    // Sort entire list descending
+    sort(list, 0, list_size(list) - 1, compare_int);
+
+    // Verify it is sorted
+    TEST_ASSERT_TRUE(is_sorted(list, compare_int));
+
+    // Verify descending property explicitly
+    for (size_t i = 1; i < list_size(list); i++) {
+        int *prev = list_get(list, i - 1);
+        int *cur  = list_get(list, i);
+        TEST_ASSERT_TRUE(*prev >= *cur);
+    }
+
+    list_destroy(list, free);
+}
+
+void test_randomized_merge(void) {
+    List *l1 = list_create(LIST_LINKED_SENTINEL);
+    List *l2 = list_create(LIST_LINKED_SENTINEL);
+    srand(54321); // fixed seed
+
+    // Fill l1 with 50 random ints
+    for (int i = 0; i < 50; i++) {
+        int *val = malloc(sizeof(int));
+        *val = rand() % 1000;
+        list_append(l1, val);
+    }
+    // Fill l2 with 50 random ints
+    for (int i = 0; i < 50; i++) {
+        int *val = malloc(sizeof(int));
+        *val = rand() % 1000;
+        list_append(l2, val);
+    }
+
+    // Sort each individually
+    sort(l1, 0, list_size(l1) - 1, compare_int);
+    sort(l2, 0, list_size(l2) - 1, compare_int);
+
+    // Merge them
+    List *merged = merge(l1, l2, compare_int);
+
+    // Check merged size
+    TEST_ASSERT_EQUAL_UINT32(100, list_size(merged));
+
+    // Check sortedness
+    TEST_ASSERT_TRUE(is_sorted(merged, compare_int));
+
+    // Spot check extremes
+    int *first = list_get(merged, 0);
+    int *last  = list_get(merged, list_size(merged) - 1);
+    TEST_ASSERT_TRUE(*first >= *last);
+
+    list_destroy(l1, free);
+    list_destroy(l2, free);
+    list_destroy(merged, NULL); // merged shares data pointers
+}
+
 
 /* === Test Runner === */
 int main(void) {
@@ -218,6 +401,13 @@ int main(void) {
     RUN_TEST(test_list_create_invalid_type);
     RUN_TEST(test_list_destroy_null);
     RUN_TEST(test_list_get_null);
+    //P2
+    RUN_TEST(test_compare_int_and_sort);
+    RUN_TEST(test_compare_str_and_sort);
+    RUN_TEST(test_merge_lists);
+    RUN_TEST(test_is_sorted_edge_cases);
+    RUN_TEST(test_randomized_sort_and_is_sorted);
+    RUN_TEST(test_randomized_merge);
 
     return UNITY_END();
 }
