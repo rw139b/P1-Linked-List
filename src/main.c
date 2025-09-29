@@ -5,8 +5,13 @@
 #include <string.h>
 #include <time.h>
 
-/* === Utility: Random data generation === */
-
+/**
+ * @brief Generates a random string with length between min_len and max_len
+ * @param min_len Minimum length of the string
+ * @param max_len Maximum length of the string
+ * @return Pointer to the newly allocated random string, or NULL on failure
+ * AI Use: Written By AI
+ */
 static char *random_string(int min_len, int max_len) {
     int len = min_len + rand() % (max_len - min_len + 1);
     char *s = malloc((size_t)len + 1);
@@ -19,8 +24,10 @@ static char *random_string(int min_len, int max_len) {
     return s;
 }
 
-/* === Sorting task for pthreads === */
-
+/**
+ * @brief Structure containing parameters for a sorting task
+ * AI Use: Written By AI
+ */
 typedef struct {
     List *list;
     size_t start;
@@ -28,14 +35,25 @@ typedef struct {
     CompareFunc cmp;
 } SortTask;
 
+/**
+ * @brief Thread function that performs sorting on a portion of a list
+ * @param arg Pointer to SortTask structure containing sort parameters
+ * @return NULL
+ * AI Use: Written By AI
+ */
 static void *thread_sort(void *arg) {
     SortTask *task = (SortTask *)arg;
     sort(task->list, task->start, task->end, task->cmp);
     return NULL;
 }
 
-/* === Verify function === */
-
+/**
+ * @brief Verifies that a list is sorted according to the compare function
+ * @param list Pointer to the list to verify
+ * @param cmp Compare function to use for verification
+ * @return 1 if sorted, 0 if not sorted
+ * AI Use: Written By AI
+ */
 static int verify_sorted(const List *list, CompareFunc cmp) {
     if (!list || !cmp) return 0;
     if (list_size(list) < 2) return 1;
@@ -50,7 +68,13 @@ static int verify_sorted(const List *list, CompareFunc cmp) {
     return 1;
 }
 
-/* === Main === */
+/**
+ * @brief Main function that demonstrates parallel sorting and merging
+ * @param argc Number of command line arguments
+ * @param argv Array of command line argument strings
+ * @return EXIT_SUCCESS on success, EXIT_FAILURE on failure
+ * AI Use: Written By AI
+ */
 #ifndef TEST
 int main(int argc, char *argv[]) {
     if (argc != 3) {

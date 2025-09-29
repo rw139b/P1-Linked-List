@@ -1,4 +1,4 @@
-# Project 1 Linked list (sentenial)
+# Project 2 Threading
 
 - Name: Ryan Wensmann
 - Email: Ryan Wensmann@u.boisestate.edu
@@ -6,9 +6,8 @@
 
 ## Known Bugs or Issues
 
-There are no issues but I was unable to reach those edge cases for 100% coverage but I belive it has to do with malloc.
+There are no issues that I have ran into in both regular tests and stress testing.
 
 ## Experience
 
-Understanding the correct pointer manipulation for a circular, doubly linked list with a sentinel node. Off-by-one errors and forgetting to update both next and prev links caused tricky bugs at first.
-Achieving near-100% code coverage required thinking carefully about edge cases, like NULL lists and out-of-bounds indices. 
+This was a great experince, I was able to have AI write 100% of all of the code for p2, I used my linked list from p1 which I worte most of with AI assistance but between ChatGPT and Claude free usage, nothing I wrote for the threading. Hoping I can get those bonus points ;). I have the saved chats if you would like to verify as well. 
